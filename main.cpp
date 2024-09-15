@@ -32,7 +32,7 @@ struct node *newNode(int value, struct node *bst)
         return newNode;
     }
 
-//recursively add the value, making sure the smallest end up at the furthest left and biggest at furtherst right
+    // recursively add the value, making sure the smallest end up at the furthest left and biggest at furtherst right
     if (value < bst->root)
     {
         bst->left = newNode(value, bst->left);
@@ -73,7 +73,7 @@ bool search(int v, struct node *bst)
     return false;
 }
 
-//ascending
+// ascending
 void traverseInOrder(struct node *tree)
 {
     if (tree != EmptyTree())
@@ -95,6 +95,124 @@ void sort(int a[10])
     traverseInOrder(t);
 }
 
+// find smallest node
+struct node *findMin(struct node *bst)
+{
+    if (bst->left == EmptyTree())
+    {
+        return bst;
+    }
+    else
+    {
+        return findMin(bst->left);
+    }
+}
+
+// delete
+struct node *deleteNode(int v, struct node *bst)
+{
+    if (bst == nullptr)
+    {
+        throw invalid_argument("Value not found!");
+    }
+
+    // Traverse to the left subtree
+    if (v < bst->root)
+    {
+        bst->left = deleteNode(v, bst->left);
+    }
+    // Traverse to the right subtree
+    else if (v > bst->root)
+    {
+        bst->right = deleteNode(v, bst->right);
+    }
+    // Node to delete found
+    else
+    {
+        // Case 1: No child (Leaf node)
+        if (bst->left == nullptr && bst->right == nullptr)
+        {
+            delete bst;
+            return nullptr;
+        }
+        // Case 2: One child (Left or Right child)
+        else if (bst->left == nullptr)
+        {
+            struct node *temp = bst->right;
+            delete bst;
+            return temp;
+        }
+        else if (bst->right == nullptr)
+        {
+            struct node *temp = bst->left;
+            delete bst;
+            return temp;
+        }
+        // Case 3: Two children
+        else
+        {
+            struct node *temp = findMin(bst->right);         // Find left-most node in right subtree
+            bst->root = temp->root;                          // overwrite the node to be deleted
+            bst->right = deleteNode(temp->root, bst->right); // Delete the successor
+        }
+    }
+
+    return bst;
+}
+
+// all smaller
+bool allSmaller(struct node *bst, int v)
+{
+    if (bst == nullptr)
+    {
+        return true;
+    }
+
+    if (bst->root < v)
+    {
+        return allSmaller(bst->left, v) && allSmaller(bst->right, v);
+    }
+    else
+    {
+        return false;
+    }
+}
+// all bigger
+bool allBigger(struct node *bst, int v)
+{
+    if (bst == nullptr)
+    {
+        return true;
+    }
+
+    if (bst->root > v)
+    {
+        return allBigger(bst->left, v) && allBigger(bst->right, v);
+    }
+    else
+    {
+        return false;
+    }
+}
+// check if its a binary search tree
+
+bool isBST(struct node *bst)
+{
+    if (bst == nullptr)
+    {
+        return true;
+    }
+
+    if (allSmaller(bst->left, bst->root) && allBigger(bst->right, bst->root) && isBST(bst->left) && isBST(bst->right))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 // entry point
 int main()
 {
@@ -103,6 +221,12 @@ int main()
     bst = newNode(3, bst);
     bst = newNode(7, bst);
     bst = newNode(12, bst);
+
+    isBST(bst) ? cout << "It is a BST!" << endl : cout << "It is not a BST!" << endl;
+    
+    traverseInOrder(bst);
+
+    deleteNode(3, bst);
 
     traverseInOrder(bst);
 
